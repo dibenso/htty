@@ -60,7 +60,8 @@ private
       name == 'Content-Type'
     end
     content_type = content_type_header ? content_type_header.last : nil
-    tempfile = render_to_file(body, content_type)
+    extension = tempfile_extension(content_type)
+    tempfile = render_to_file(body, extension)
     path = platform_path(tempfile.path)
     arguments_to_open = arguments.empty? ? '' : " #{arguments.join ' '}"
     `#{open_command}#{arguments_to_open} #{path}`
@@ -74,9 +75,9 @@ private
     HTTY::Platform.windows? ? path.gsub('/', '\\') : path
   end
 
-  def render_to_file(body, content_type)
-    filename = "htty.#{tempfile_extension content_type}"
-    HTTY::TempfilePreservingExtname.new(filename).tap do |f|
+  def render_to_file(body, extension)
+    filename = "htty.#{extension}"
+    HTTY::TempfilePreservingExtname.new([filename, ".#{extension}"]).tap do |f|
       f.write body
       f.close
     end
